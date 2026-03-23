@@ -13,7 +13,6 @@ configurations {
         exclude group: 'androidx.versionedparcelable', module: 'versionedparcelable'
         exclude group: 'androidx.core', module: 'core'
         exclude group: 'androidx.fragment', module: 'fragment'
-        exclude group: 'androidx.lifecycle', module: 'lifecycle-common'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-livedata'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-livedata-core'
@@ -24,27 +23,25 @@ configurations {
         exclude group: 'androidx.arch.core', module: 'core-runtime'
         exclude group: 'androidx.loader', module: 'loader'
         exclude group: 'androidx.tracing', module: 'tracing'
-            }
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(fileTree(dir: 'libs', include: ['*.jar'])) {
+        exclude group: 'androidx.lifecycle'
+        exclude group: 'android.arch.lifecycle'
+    }
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
-
+    implementation 'androidx.lifecycle:lifecycle-common:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.7.0'
 }
 
 android {
-
     packagingOptions {
-    exclude 'androidx/lifecycle/ReportFragment.class'
-    exclude 'androidx/lifecycle/ReportFragment$*.class'
-}
-    configurations.all {
-    resolutionStrategy {
-        force 'androidx.lifecycle:lifecycle-runtime:2.7.0'
-        force 'androidx.lifecycle:lifecycle-common:2.7.0'
+        exclude 'androidx/lifecycle/ReportFragment.class'
+        exclude 'androidx/lifecycle/ReportFragment$*.class'
     }
-}
     namespace "com.example.asset_scanner"
     compileSdk 35
     ndkVersion flutter.ndkVersion
