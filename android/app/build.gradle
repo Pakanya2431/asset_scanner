@@ -1,50 +1,9 @@
-import com.example.asset_scanner.RfidSdkPlugin
-```
-
-Save both files, then push:
-```
-cd D:\asset_scanner
-git add .
-git commit -m "Fix duplicate classes and import"
-git push
-
 plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-android {
-    namespace "com.example.asset_scanner"
-    compileSdk 35
-    ndkVersion flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    defaultConfig {
-        applicationId "com.example.asset_scanner"
-        minSdk 21
-        targetSdk flutter.targetSdkVersion
-        versionCode flutter.versionCode
-        versionName flutter.versionName
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-            minifyEnabled false
-            shrinkResources false
-        }
-
-    }
-}
 configurations {
     implementation {
         exclude group: 'androidx.activity', module: 'activity'
@@ -57,11 +16,33 @@ configurations {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
-```
 
-Also open `MainActivity.kt`:
-```
-code "D:\asset_scanner\android\app\src\main\kotlin\com\example\asset_scanner\MainActivity.kt"
+android {
+    namespace "com.example.asset_scanner"
+    compileSdk 35
+    ndkVersion flutter.ndkVersion
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    defaultConfig {
+        applicationId "com.example.asset_scanner"
+        minSdk 21
+        targetSdk flutter.targetSdkVersion
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
 
 flutter {
     source "../.."
