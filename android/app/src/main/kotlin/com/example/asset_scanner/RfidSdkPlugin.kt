@@ -1,9 +1,10 @@
-package com.example.asset_scanner
+﻿package com.example.asset_scanner
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.uhf.api.cls.Reader
 import com.uhf.base.UHFManager
 import com.uhf.base.UHFModuleType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -17,7 +18,7 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
     private var context: Context? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var scanning = false
-    private var uhfManager: UHFManager? = null
+    private var reader: Reader? = null
 
     companion object {
         private const val TAG = "RfidSdkPlugin"
@@ -62,17 +63,22 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         try {
             UHFManager.con = context
             val mgr = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE)
-            uhfManager = mgr
-            mgr.powerOn()
-            mgr.addReadListener { _, tags ->
-                tags?.forEach { tag ->
-                    val epc = tag.EpcId?.joinToString("") { "%02X".format(it) } ?: return@forEach
-                    mainHandler.post { eventSink?.success(epc) }
+            val r = mgr as Reader
+            reader = r
+            r.powerOn()
+            val listener = object : com.uhf.api.cls.ReadListener {
+                override fun tagRead(rd: Reader, tags: Array<Reader.TAGINFO>?) {
+                    tags?.forEach { tag ->
+                        val bytes = tag.EpcId ?: return@forEach
+                        val epc = bytes.joinToString("") { "%02X".format(it) }
+                        mainHandler.post { eventSink?.success(epc) }
+                    }
                 }
             }
-            val option = UHFManager.BackReadOption()
+            r.addReadListener(listener)
+            val option = Reader.BackReadOption()
             option.ReadDuration = 0
-            mgr.StartReading(intArrayOf(1), 1, option)
+            r.StartReading(intArrayOf(1), 1, option)
         } catch (e: Exception) {
             Log.e(TAG, "RFID start error: ${e.message}")
             scanning = false
@@ -84,10 +90,10 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         scanning = false
         Log.d(TAG, "RFID scanning stopped")
         try {
-            uhfManager?.StopReading()
+            reader?.StopReading()
         } catch (e: Exception) {
             Log.e(TAG, "RFID stop error: ${e.message}")
         }
-        uhfManager = null
+        reader = null
     }
 }
