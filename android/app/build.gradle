@@ -1,3 +1,13 @@
+import com.example.asset_scanner.RfidSdkPlugin
+```
+
+Save both files, then push:
+```
+cd D:\asset_scanner
+git add .
+git commit -m "Fix duplicate classes and import"
+git push
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -35,9 +45,23 @@ android {
 
     }
 }
+configurations {
+    implementation {
+        exclude group: 'androidx.activity', module: 'activity'
+        exclude group: 'androidx.viewpager', module: 'viewpager'
+        exclude group: 'androidx.versionedparcelable', module: 'versionedparcelable'
+        exclude group: 'androidx.core', module: 'core'
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
+```
+
+Also open `MainActivity.kt`:
+```
+code "D:\asset_scanner\android\app\src\main\kotlin\com\example\asset_scanner\MainActivity.kt"
 
 flutter {
     source "../.."
