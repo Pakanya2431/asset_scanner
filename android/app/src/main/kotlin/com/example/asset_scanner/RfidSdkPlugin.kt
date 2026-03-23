@@ -65,7 +65,6 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
             val mgr = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE)
             val r = mgr as Reader
             reader = r
-            r.powerOn()
             val listener = object : com.uhf.api.cls.ReadListener {
                 override fun tagRead(rd: Reader, tags: Array<Reader.TAGINFO>?) {
                     tags?.forEach { tag ->
@@ -76,9 +75,7 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
                 }
             }
             r.addReadListener(listener)
-            val option = Reader.BackReadOption()
-            option.ReadDuration = 0
-            r.StartReading(intArrayOf(1), 1, option)
+            r.StartReading(intArrayOf(1), 1, null)
         } catch (e: Exception) {
             Log.e(TAG, "RFID start error: ${e.message}")
             scanning = false
