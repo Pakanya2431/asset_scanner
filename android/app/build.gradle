@@ -14,7 +14,6 @@ configurations {
         exclude group: 'androidx.core', module: 'core'
         exclude group: 'androidx.fragment', module: 'fragment'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-common'
-        exclude group: 'androidx.lifecycle', module: 'lifecycle-runtime'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-livedata'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-livedata-core'
@@ -25,13 +24,13 @@ configurations {
         exclude group: 'androidx.arch.core', module: 'core-runtime'
         exclude group: 'androidx.loader', module: 'loader'
         exclude group: 'androidx.tracing', module: 'tracing'
-        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
-        exclude group: 'androidx.lifecycle', module: 'lifecycle-process'
-    }
+            }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
+
 }
 
 android {
