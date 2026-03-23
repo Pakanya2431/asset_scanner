@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.uhf.api.cls.Reader
 import com.uhf.base.UHFManager
 import com.uhf.base.UHFModuleType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -18,7 +17,7 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
     private var context: Context? = null
     private val mainHandler = Handler(Looper.getMainLooper())
     private var scanning = false
-    private var uhfManager: Reader? = null
+    private var uhfManager: UHFManager? = null
 
     companion object {
         private const val TAG = "RfidSdkPlugin"
@@ -62,17 +61,18 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         Log.d(TAG, "RFID scanning started")
         try {
             UHFManager.con = context
-            uhfManager = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE)
-            uhfManager?.powerOn()
-            uhfManager?.addReadListener { _, tags ->
+            val mgr = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE)
+            uhfManager = mgr
+            mgr.powerOn()
+            mgr.addReadListener { _, tags ->
                 tags?.forEach { tag ->
                     val epc = tag.EpcId?.joinToString("") { "%02X".format(it) } ?: return@forEach
                     mainHandler.post { eventSink?.success(epc) }
                 }
             }
-            val option = Reader.BackReadOption()
+            val option = UHFManager.BackReadOption()
             option.ReadDuration = 0
-            uhfManager?.StartReading(intArrayOf(1), 1, option)
+            mgr.StartReading(intArrayOf(1), 1, option)
         } catch (e: Exception) {
             Log.e(TAG, "RFID start error: ${e.message}")
             scanning = false
@@ -85,9 +85,9 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         Log.d(TAG, "RFID scanning stopped")
         try {
             uhfManager?.StopReading()
-            uhfManager?.powerOff()
         } catch (e: Exception) {
             Log.e(TAG, "RFID stop error: ${e.message}")
         }
+        uhfManager = null
     }
 }
