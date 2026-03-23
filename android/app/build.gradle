@@ -32,7 +32,11 @@ android {
             minifyEnabled false
             shrinkResources false
         }
+
     }
+}
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 flutter {
