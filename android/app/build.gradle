@@ -25,6 +25,8 @@ configurations {
         exclude group: 'androidx.arch.core', module: 'core-runtime'
         exclude group: 'androidx.loader', module: 'loader'
         exclude group: 'androidx.tracing', module: 'tracing'
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-process'
     }
 }
 
@@ -33,6 +35,17 @@ dependencies {
 }
 
 android {
+
+    packagingOptions {
+    exclude 'androidx/lifecycle/ReportFragment.class'
+    exclude 'androidx/lifecycle/ReportFragment$*.class'
+}
+    configurations.all {
+    resolutionStrategy {
+        force 'androidx.lifecycle:lifecycle-runtime:2.7.0'
+        force 'androidx.lifecycle:lifecycle-common:2.7.0'
+    }
+}
     namespace "com.example.asset_scanner"
     compileSdk 35
     ndkVersion flutter.ndkVersion
