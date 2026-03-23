@@ -489,9 +489,10 @@ class _SelectCard extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  const _SelectCard({
+ const _SelectCard({
     required this.label, required this.icon,
-    required this.selected, required this.onTap, this.sub,
+    required this.selected, required this.onTap,
+    this.sub,
   });
 
   @override
