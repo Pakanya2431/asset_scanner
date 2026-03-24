@@ -62,8 +62,7 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         scanning = true
         Log.d(TAG, "RFID scanning started")
         try {
-            UHFManager.con = context
-            val m = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE)
+            val m = UHFManager.getUHFImplSigleInstance(UHFModuleType.UM_MODULE, context)
             mgr = m
             val cls = m.javaClass
 
@@ -80,18 +79,19 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
             executor.execute {
                 while (scanning) {
                     try {
+                        // readTagFromBuffer() returns String[] — each element is an EPC string
                         val result = cls.getMethod("readTagFromBuffer").invoke(m)
-                        if (result != null) {
-                            // result could be a TAGINFO or String
-                            val epc = extractEpc(result)
-                            if (epc != null && epc.isNotEmpty() && !seenTags.contains(epc)) {
-                                seenTags.add(epc)
-                                Log.d(TAG, "Tag read: $epc")
-                                mainHandler.post { eventSink?.success(epc) }
+                        if (result is Array<*>) {
+                            for (item in result) {
+                                val epc = item?.toString()
+                                if (!epc.isNullOrEmpty() && seenTags.add(epc)) {
+                                    Log.d(TAG, "Tag read: $epc")
+                                    mainHandler.post { eventSink?.success(epc) }
+                                }
                             }
                         }
                     } catch (e: Exception) {
-                        // ignore polling errors
+                        Log.e(TAG, "Poll error: ${e.message}")
                     }
                     Thread.sleep(100)
                 }
@@ -99,25 +99,6 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         } catch (e: Exception) {
             Log.e(TAG, "RFID start error: ${e.message}")
             scanning = false
-        }
-    }
-
-    private fun extractEpc(obj: Any): String? {
-        return try {
-            // Try EpcId field (byte array)
-            val field = obj.javaClass.getField("EpcId")
-            val epcId = field.get(obj)
-            when (epcId) {
-                is ByteArray -> epcId.joinToString("") { "%02X".format(it) }
-                is String -> epcId
-                else -> obj.toString()
-            }
-        } catch (e: Exception) {
-            try {
-                // Try toString
-                val str = obj.toString()
-                if (str.length >= 4) str else null
-            } catch (e2: Exception) { null }
         }
     }
 
