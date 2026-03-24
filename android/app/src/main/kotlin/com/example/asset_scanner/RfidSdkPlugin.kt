@@ -4,8 +4,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.uhf.api.cls.ReadListener
-import com.uhf.api.cls.Reader
 import com.uhf.base.UHFManager
 import com.uhf.base.UHFModuleType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -67,40 +65,14 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
             mgr = m
             Log.d(TAG, "UHF instance type: ${m?.javaClass?.name}")
 
-            val listener = object : ReadListener {
-                override fun tagRead(rd: Reader, tags: Array<Reader.TAGINFO>?) {
-                    tags?.forEach { tag ->
-                        val bytes = tag.EpcId ?: return@forEach
-                        val epc = bytes.joinToString("") { "%02X".format(it) }
-                        Log.d(TAG, "Tag read: $epc")
-                        mainHandler.post { eventSink?.success(epc) }
-                    }
-                }
+            // Log ALL methods available on MyLib
+            m?.javaClass?.methods?.forEach { method ->
+                Log.d(TAG, "METHOD: ${method.name} params=${method.parameterTypes.map { it.name }}")
+            }
+            m?.javaClass?.interfaces?.forEach { iface ->
+                Log.d(TAG, "INTERFACE: ${iface.name}")
             }
 
-            // Call methods via reflection since type is realid.rfidlib.MyLib
-            val cls = m.javaClass
-            try {
-                cls.getMethod("addReadListener", ReadListener::class.java).invoke(m, listener)
-                Log.d(TAG, "addReadListener OK")
-            } catch (e: Exception) {
-                Log.e(TAG, "addReadListener failed: ${e.message}")
-            }
-            try {
-                cls.getMethod("StartReading", IntArray::class.java, Int::class.java, Any::class.java)
-                    .invoke(m, intArrayOf(1), 1, null)
-                Log.d(TAG, "StartReading OK")
-            } catch (e: Exception) {
-                Log.e(TAG, "StartReading failed: ${e.message}")
-                // Try without option parameter
-                try {
-                    cls.getMethod("StartReading", IntArray::class.java, Int::class.java)
-                        .invoke(m, intArrayOf(1), 1)
-                    Log.d(TAG, "StartReading (2 params) OK")
-                } catch (e2: Exception) {
-                    Log.e(TAG, "StartReading (2 params) failed: ${e2.message}")
-                }
-            }
         } catch (e: Exception) {
             Log.e(TAG, "RFID start error: ${e.message}")
             scanning = false
@@ -111,15 +83,6 @@ class RfidSdkPlugin : FlutterPlugin, EventChannel.StreamHandler {
         if (!scanning) return
         scanning = false
         Log.d(TAG, "RFID scanning stopped")
-        try {
-            val m = mgr
-            if (m != null) {
-                m.javaClass.getMethod("StopReading").invoke(m)
-                Log.d(TAG, "StopReading OK")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "RFID stop error: ${e.message}")
-        }
         mgr = null
     }
 }
